@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RLC Circuit Simulator - Interactive Waveform Analysis</title>
+    <meta name="description"
+        content="Advanced RLC circuit simulator with real-time waveform animations and automatic parameter calculation">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('rlc_sim_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <div class="theme-toggle-wrapper">
+                    <div class="theme-toggle-group" role="radiogroup" aria-label="Color Theme Selection">
+                        <button class="theme-btn active" id="themeDarkBtn" role="radio" aria-checked="true" data-theme-val="dark" title="Switch to Dark Mode" aria-label="Dark Mode">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                            <span>Dark</span>
+                        </button>
+                        <button class="theme-btn" id="themeLightBtn" role="radio" aria-checked="false" data-theme-val="light" title="Switch to Light Mode" aria-label="Light Mode">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                            <span>Light</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="18" stroke="url(#gradient1)" stroke-width="2" />
+                        <path d="M12 20 Q20 10, 28 20 T 36 20" stroke="url(#gradient1)" stroke-width="2" fill="none" />
+                        <defs>
+                            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <h1>RLC Circuit Simulator</h1>
+                </div>
+                <p class="tagline">Interactive Circuit Analysis & Waveform Visualization</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Circuit Type Selection -->
+            <section class="card circuit-selector" aria-labelledby="circuitSelectorHeading">
+                <h2 id="circuitSelectorHeading">Select Circuit Type</h2>
+                <div class="circuit-types" role="tablist" aria-label="Circuit Mode Selection">
+                    <button class="circuit-btn" role="tab" aria-selected="false" data-type="R" aria-label="Resistive Circuit">
+                        <div class="circuit-icon" aria-hidden="true">R</div>
+                        <span>Resistive</span>
+                    </button>
+                    <button class="circuit-btn" role="tab" aria-selected="false" data-type="L" aria-label="Inductive Circuit">
+                        <div class="circuit-icon" aria-hidden="true">L</div>
+                        <span>Inductive</span>
+                    </button>
+                    <button class="circuit-btn" role="tab" aria-selected="false" data-type="C" aria-label="Capacitive Circuit">
+                        <div class="circuit-icon" aria-hidden="true">C</div>
+                        <span>Capacitive</span>
+                    </button>
+                    <button class="circuit-btn" role="tab" aria-selected="false" data-type="RL" aria-label="Series RL Circuit">
+                        <div class="circuit-icon" aria-hidden="true">RL</div>
+                        <span>RL Circuit</span>
+                    </button>
+                    <button class="circuit-btn" role="tab" aria-selected="false" data-type="RC" aria-label="Series RC Circuit">
+                        <div class="circuit-icon" aria-hidden="true">RC</div>
+                        <span>RC Circuit</span>
+                    </button>
+                    <button class="circuit-btn active" role="tab" aria-selected="true" data-type="RLC" aria-label="Series RLC Circuit">
+                        <div class="circuit-icon" aria-hidden="true">RLC</div>
+                        <span>RLC Circuit</span>
+                    </button>
+                </div>
+            </section>
+
+            <div class="grid-layout">
+                <!-- Input Parameters -->
+                <section class="card parameters" aria-labelledby="parametersHeading">
+                    <h2 id="parametersHeading">Circuit Parameters</h2>
+                    <div class="input-grid" id="inputGrid">
+                        <!-- Dynamic inputs will be inserted here -->
+                    </div>
+                    <div id="validationFeedback" class="validation-feedback" role="alert" aria-live="polite"></div>
+                    <button class="btn-primary" id="calculateBtn" aria-label="Calculate circuit parameters and simulate">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M10 2L2 18h16L10 2z" stroke="currentColor" stroke-width="2" fill="none" />
+                        </svg>
+                        Calculate & Simulate
+                    </button>
+                </section>
+
+                <!-- Results -->
+                <section class="card results" id="resultsSection" aria-labelledby="resultsHeading">
+                    <h2 id="resultsHeading">Calculated Values</h2>
+                    <div class="results-grid" id="resultsGrid" aria-live="polite">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                                <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="2" opacity="0.2" />
+                                <path d="M32 16v32M16 32h32" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                            <p>Enter parameters and click Calculate</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Waveform Display -->
+            <section class="card waveform-container" aria-labelledby="waveformHeading">
+                <div class="waveform-header">
+                    <h2 id="waveformHeading">Waveform Visualization</h2>
+                    <div class="waveform-controls">
+                        <button class="control-btn" id="playPauseBtn" aria-label="Play or pause waveform animation" title="Play / Pause">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M5 3l12 7-12 7V3z" />
+                            </svg>
+                        </button>
+                        <button class="control-btn" id="resetBtn" aria-label="Reset simulation to initial state" title="Reset">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                                stroke-width="2" aria-hidden="true">
+                                <path d="M2 10a8 8 0 1 1 0 .1" />
+                                <path d="M2 4v6h6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <canvas id="waveformCanvas" role="img" aria-label="Oscilloscope waveform display of voltage, current, and power over time"></canvas>
+                <div class="legend" role="tablist" aria-label="Waveform trace selection">
+                    <button type="button" class="legend-item active" role="tab" aria-selected="true" tabindex="0" data-trace="voltage" title="Display Voltage trace only" aria-label="Display Voltage trace only" id="legendBtnVoltage">
+                        <span class="legend-color voltage" aria-hidden="true"></span>
+                        <span>Voltage v(t)</span>
+                    </button>
+                    <button type="button" class="legend-item" role="tab" aria-selected="false" tabindex="-1" data-trace="current" title="Display Current trace only" aria-label="Display Current trace only" id="legendBtnCurrent">
+                        <span class="legend-color current" aria-hidden="true"></span>
+                        <span>Current i(t)</span>
+                    </button>
+                    <button type="button" class="legend-item" role="tab" aria-selected="false" tabindex="-1" data-trace="power" title="Display Instantaneous Power trace only" aria-label="Display Instantaneous Power trace only" id="legendBtnPower">
+                        <span class="legend-color power" aria-hidden="true"></span>
+                        <span>Instantaneous Power p(t)</span>
+                    </button>
+                    <button type="button" class="legend-item" role="tab" aria-selected="false" tabindex="-1" data-trace="avg-power" title="Display Average Real Power reference line only" aria-label="Display Average Real Power reference line only" id="legendBtnAvgPower">
+                        <span class="legend-color avg-power" aria-hidden="true"></span>
+                        <span>Average Real Power P</span>
+                    </button>
+                    <button type="button" class="legend-item" role="tab" aria-selected="false" tabindex="-1" data-trace="all" title="Display all waveform traces" aria-label="Display all waveform traces" id="legendBtnAll">
+                        <span class="legend-color all-traces" aria-hidden="true"></span>
+                        <span>Show All</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- AC Analysis — Phasor Diagrams -->
+            <section class="card ac-analysis" id="acAnalysisSection" aria-labelledby="acAnalysisHeading">
+                <div class="ac-analysis-header">
+                    <div class="ac-analysis-title-group">
+                        <h2 id="acAnalysisHeading">AC Analysis — Phasor Diagrams</h2>
+                        <span class="badge-circuit-mode" id="badgePhasorMode">Series RLC</span>
+                    </div>
+                    <div class="ac-analysis-controls" role="toolbar" aria-label="Phasor Diagram View Selection">
+                        <button class="btn-phasor-view active" data-phasor-view="vi" title="Voltage and Current Phasors (Voltage Reference)">V / I Phasors</button>
+                        <button class="btn-phasor-view" data-phasor-view="voltage" title="Component Voltage Vectors (Current Reference)">Voltage Vectors</button>
+                        <button class="btn-phasor-view" data-phasor-view="impedance" title="Impedance Triangle (R, X, Z)">Impedance Triangle</button>
+                    </div>
+                </div>
+                <div id="phasorContainer" class="phasor-container" tabindex="0" role="region" aria-label="Interactive phasor and impedance diagram">
+                    <canvas id="phasorCanvas" role="img" aria-label="Phasor diagram showing voltage and current vectors, component voltages, or impedance triangle"></canvas>
+                </div>
+                <div id="phasorInfo" class="phasor-info" aria-live="polite"></div>
+                <div id="phasorExplanation" class="phasor-explanation" aria-live="polite"></div>
+            </section>
+
+            <!-- Interactive 3D Circuit Model -->
+            <section class="card circuit-3d" id="circuit3DSection" aria-labelledby="circuit3DHeading">
+                <div class="circuit-3d-header">
+                    <div class="circuit-3d-title-group">
+                        <h2 id="circuit3DHeading">Interactive 3D Circuit Model</h2>
+                        <span class="badge-circuit-mode" id="badge3DMode">Series RLC</span>
+                    </div>
+                    <div class="circuit-3d-controls" role="toolbar" aria-label="3D View and Animation Controls">
+                        <button class="btn-3d-view active" data-view="iso" title="Isometric View (Default)">Isometric</button>
+                        <button class="btn-3d-view" data-view="front" title="Front Elevation View">Front</button>
+                        <button class="btn-3d-view" data-view="top" title="Top Plan View">Top</button>
+                        <button class="btn-3d-view" data-view="reset" title="Reset Camera Position">Reset</button>
+                        <button class="btn-3d-view active" id="btnToggleParticles" title="Toggle current particle animation">Show Current</button>
+                        <button class="btn-3d-view" id="btnToggleCurrentMode" title="Toggle Conventional Current vs Electron Flow">Current: Conventional</button>
+                        <button class="btn-3d-view active" id="btnToggleLabels" title="Toggle 3D component value badges">Show Values</button>
+                    </div>
+                </div>
+                <div id="circuit3DContainer" class="circuit-3d-container" tabindex="0" role="region" aria-label="Interactive 3D Circuit Workbench. Drag to rotate, scroll to zoom, right-drag to pan.">
+                    <canvas id="circuit3DCanvas" role="img" aria-label="3D model of series circuit components and wiring"></canvas>
+                    <div id="labels3DOverlay" class="labels-3d-overlay" aria-hidden="true"></div>
+                    <div id="fallback3D" class="circuit-3d-fallback" style="display: none;">
+                        <p>WebGL hardware acceleration is unavailable. 2D schematic diagram remains active below.</p>
+                    </div>
+                </div>
+                <div class="circuit-3d-footer">
+                    <div class="circuit-3d-hint">
+                        <span>🖱️ <strong>Left Click + Drag</strong> to rotate &bull; <strong>Scroll</strong> to zoom &bull; <strong>Right Click + Drag</strong> to pan</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Circuit Diagram -->
+            <section class="card circuit-diagram" aria-labelledby="diagramHeading">
+                <div class="circuit-diagram-header">
+                    <h2 id="diagramHeading">Circuit Diagram</h2>
+                    <button class="btn-diagram-mode" id="btnDiagramCurrentMode" title="Toggle Conventional Current vs Electron Flow" aria-label="Toggle Conventional Current vs Electron Flow">Current: Conventional</button>
+                </div>
+                <div id="circuitDiagram" class="diagram-container">
+                    <!-- SVG circuit will be drawn here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="three.min.js"></script>
+    <script>
+        if (typeof THREE === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+        }
+    </script>
+    <script src="OrbitControls.js"></script>
+    <script>
+        if (typeof THREE !== 'undefined' && !THREE.OrbitControls) {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>
